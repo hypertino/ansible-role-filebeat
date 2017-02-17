@@ -6,6 +6,14 @@
 
 - name: Add Filebeat repository.
   template:
+    src: beats.repo.5x.j2
+    dest: /etc/yum.repos.d/beats.repo
+    mode: 0644
+  when: filebeat_version == "5.x"
+
+- name: Add Filebeat repository.
+  template:
     src: beats.repo.j2
     dest: /etc/yum.repos.d/beats.repo
     mode: 0644
+  when: filebeat_version != "5.x"

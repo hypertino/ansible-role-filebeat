@@ -12,7 +12,7 @@
   file:
     path: "{{ filebeat_ssl_dir }}"
     state: directory
-  when: filebeat_ssl_key_file
+  when: filebeat_ssl_key_file or filebeat_ssl_authority_file
 
 - name: Copy SSL key and cert for filebeat.
   copy:
@@ -24,3 +24,13 @@
     - "{{ filebeat_ssl_certificate_file }}"
   notify: restart filebeat
   when: filebeat_ssl_key_file and filebeat_ssl_certificate_file
+
+- name: Copy certificate authority for filebeat.
+  copy:
+    src: "{{ item }}"
+    dest: "{{ filebeat_ssl_dir }}/{{ item | basename }}"
+    mode: 0644
+  with_items:
+    - "{{ filebeat_ssl_authority_file }}"
+  notify: restart filebeat
+  when: filebeat_ssl_authority_file

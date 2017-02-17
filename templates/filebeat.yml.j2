@@ -56,11 +56,17 @@ output:
     # Elasticsearch. The default is 15 seconds.
     #topology_expire: 15
 
-{% if filebeat_ssl_certificate_file and filebeat_ssl_key_file %}
     # tls configuration. By default is off.
     tls:
+
+{% if filebeat_ssl_authority_file %}
+
       # List of root certificates for HTTPS server verifications
-      #certificate_authorities: ["/etc/pki/root/ca.pem"]
+      certificate_authorities: ["{{ filebeat_ssl_dir }}/{{ filebeat_ssl_authority_file | basename}}"]
+
+{% endif %}
+
+{% if filebeat_ssl_certificate_file and filebeat_ssl_key_file %}
 
       # Certificate for TLS client authentication
       certificate: "{{ filebeat_ssl_dir }}/{{ filebeat_ssl_certificate_file | basename }}"
@@ -72,7 +78,7 @@ output:
       # If insecure is set to true, all server host names and certificates will be
       # accepted. In this mode TLS based connections are susceptible to
       # man-in-the-middle attacks. Use only for testing.
-      insecure: {{ filebeat_ssl_insecure }}
+      #insecure: true
 
       # Configure cipher suites to be used for TLS connections
       #cipher_suites: []
@@ -105,46 +111,42 @@ output:
     # top topbeat and for Filebeat to filebeat.
     #index: filebeat
 
-{% if filebeat_ssl_certificate_file and filebeat_ssl_key_file %}
     # Optional TLS. By default is off.
+{% if filebeat_version == '2.x' %}
     tls:
+{% else %}
+    ssl:
+{% endif %}
+
+{% if filebeat_ssl_authority_file %}
+
       # List of root certificates for HTTPS server verifications
-      #certificate_authorities: ["/etc/pki/root/ca.pem"]
+      certificate_authorities: ["{{ filebeat_ssl_dir }}/{{ filebeat_ssl_authority_file | basename}}"]
+
+{% endif %}
+
+{% if filebeat_ssl_certificate_file and filebeat_ssl_key_file %}
 
       # Certificate for TLS client authentication
       certificate: "{{ filebeat_ssl_dir }}/{{ filebeat_ssl_certificate_file | basename }}"
 
       # Client Certificate Key
+{% if filebeat_version == '2.x' %}
       certificate_key: "{{ filebeat_ssl_dir }}/{{ filebeat_ssl_key_file | basename}}"
+{% else %}
+      key: "{{ filebeat_ssl_dir }}/{{ filebeat_ssl_key_file | basename}}"
+{% endif %}
 
       # Controls whether the client verifies server certificates and host name.
       # If insecure is set to true, all server host names and certificates will be
       # accepted. In this mode TLS based connections are susceptible to
       # man-in-the-middle attacks. Use only for testing.
       #insecure: true
-      insecure: {{ filebeat_ssl_insecure }}
 
       # Configure cipher suites to be used for TLS connections
       #cipher_suites: []
 
       # Configure curve types for ECDHE based cipher suites
       #curve_types: []
-{% endif %}
-
-{% if filebeat_enable_logging %}
-logging:
-  ### Filebeat log
-  level: {{ filebeat_log_level }}
-
-  # Enable file rotation with default configuration
-  to_files: true
-
-  # Do not log to syslog
-  to_syslog: false
-
-  files:
-    path: {{ filebeat_log_dir }}
-    name: {{ filebeat_log_filename }}
-    keepfiles: 7
 {% endif %}
 {% endif %}
