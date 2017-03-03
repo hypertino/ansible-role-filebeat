@@ -33,4 +33,4 @@
   with_items:
     - "{{ filebeat_ssl_authority_file }}"
   notify: restart filebeat
-  when: filebeat_ssl_authority_file
+  when: filebeat_ssl_authority_file != ""
